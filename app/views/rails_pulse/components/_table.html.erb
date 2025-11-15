@@ -22,11 +22,15 @@
   colspan = columns.length
 %>
 
-<table class="table mbs-4">
+<table class="table mbs-4" style="table-layout: fixed;">
   <thead>
     <tr>
-      <% columns.each do |column| %>
-        <th class="<%= column[:class] %>"><%= column[:label] %></th>
+      <% columns.each_with_index do |column, index| %>
+        <% if index == 0 %>
+          <th class="<%= column[:class] %>" style="width: 200px;"><%= column[:label] %></th>
+        <% else %>
+          <th class="<%= column[:class] %>"><%= column[:label] %></th>
+        <% end %>
       <% end %>
     </tr>
   </thead>
@@ -34,10 +38,20 @@
     <% if data_rows.any? %>
       <% data_rows.each do |row_data| %>
         <tr>
-          <% columns.each do |column| %>
-            <td class="<%= column[:cell_class] %> <%= cell_highlight_class(row_data, column) %>">
-              <%= render_cell_content(row_data, column) %>
-            </td>
+          <% columns.each_with_index do |column, index| %>
+            <% if index == 0 %>
+              <td class="<%= column[:cell_class] %> <%= cell_highlight_class(row_data, column) %>" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <% if column[:link_to] && row_data[column[:link_to]] %>
+                  <%= link_to row_data[column[:field]], row_data[column[:link_to]], data: { turbo_frame: "_top" }, style: "display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" %>
+                <% else %>
+                  <%= render_cell_content(row_data, column) %>
+                <% end %>
+              </td>
+            <% else %>
+              <td class="<%= column[:cell_class] %> <%= cell_highlight_class(row_data, column) %>">
+                <%= render_cell_content(row_data, column) %>
+              </td>
+            <% end %>
           <% end %>
         </tr>
       <% end %>
