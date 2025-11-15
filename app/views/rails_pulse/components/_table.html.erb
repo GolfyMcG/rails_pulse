@@ -1,7 +1,7 @@
 <%
   # Extract the table data from the arguments
   table_data = defined?(table_data) ? table_data : (defined?(data) ? data : {})
-  
+
   # Handle both old format (array) and new format (hash with columns and data)
   if table_data.is_a?(Array)
     # Legacy format - assume route data
@@ -18,19 +18,15 @@
     columns = table_data[:columns] || []
     data_rows = table_data[:data] || []
   end
-  
+
   colspan = columns.length
 %>
 
 <table class="table mbs-4" style="table-layout: fixed;">
   <thead>
     <tr>
-      <% columns.each_with_index do |column, index| %>
-        <% if index == 0 %>
-          <th class="<%= column[:class] %>" style="width: 200px;"><%= column[:label] %></th>
-        <% else %>
-          <th class="<%= column[:class] %>"><%= column[:label] %></th>
-        <% end %>
+      <% columns.each do |column| %>
+        <th class="<%= column[:class] %>" <%= "style=\"width: #{column[:width]};\"".html_safe if column[:width] %>><%= column[:label] %></th>
       <% end %>
     </tr>
   </thead>
@@ -38,20 +34,10 @@
     <% if data_rows.any? %>
       <% data_rows.each do |row_data| %>
         <tr>
-          <% columns.each_with_index do |column, index| %>
-            <% if index == 0 %>
-              <td class="<%= column[:cell_class] %> <%= cell_highlight_class(row_data, column) %>" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                <% if column[:link_to] && row_data[column[:link_to]] %>
-                  <%= link_to row_data[column[:field]], row_data[column[:link_to]], data: { turbo_frame: "_top" }, style: "display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" %>
-                <% else %>
-                  <%= render_cell_content(row_data, column) %>
-                <% end %>
-              </td>
-            <% else %>
-              <td class="<%= column[:cell_class] %> <%= cell_highlight_class(row_data, column) %>">
-                <%= render_cell_content(row_data, column) %>
-              </td>
-            <% end %>
+          <% columns.each do |column| %>
+            <td class="<%= column[:cell_class] %> <%= cell_highlight_class(row_data, column) %>" <%= "style=\"max-width: #{column[:width]}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;\"".html_safe if column[:width] %>>
+              <%= render_cell_content(row_data, column) %>
+            </td>
           <% end %>
         </tr>
       <% end %>
